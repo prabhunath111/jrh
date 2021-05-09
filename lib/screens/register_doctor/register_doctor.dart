@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 // import 'package:image_picker/image_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jrh_innoventure/Utils/toast.dart';
@@ -17,13 +18,16 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
   final baseUrl = 'localhost:3030/user';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _mobileController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
   String _mobile;
+  String _name;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.withOpacity(0.5),
+        backgroundColor: secondary,
         title: Text(
           'Doctor Detail',
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
@@ -33,6 +37,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
       body: _getBody(),
     );
   }
+
   Widget _getBody() {
     return ListView(
       children: [
@@ -45,6 +50,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
       ],
     );
   }
+
   Widget getCards(String title, Icon icon) {
     return InkWell(
       onTap: () {
@@ -76,6 +82,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
       ),
     );
   }
+
   Widget getSubmitBtn() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -109,17 +116,14 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
       ),
     );
   }
+
   Widget getmobileWidget() {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
-        // height: 60,
-        // width: MediaQuery.of(context).size.width * 0.1,
-        child:
-        Padding(
+        child: Padding(
           padding: const EdgeInsets.only(left: 4.0, right: 4.0),
-          child:
-          Form(
+          child: Form(
               key: _formKey,
               child: Column(
                 children: <Widget>[
@@ -127,14 +131,14 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                     data: ThemeData(primaryColor: primary),
                     child: TextFormField(
                       controller: _mobileController,
+                      keyboardType: TextInputType.number,
                       cursorColor: primary,
                       validator: (input) {
                         if (input.isEmpty) {
                           return 'Provide mobile number';
-                        }
-                        if (input.length < 10) {
+                        } else if (input.length < 10) {
                           return 'Provide 10 digit mobile number';
-                        }
+                        } else {}
                       },
                       decoration: InputDecoration(
                         labelText: 'Mobile',
@@ -142,20 +146,44 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                         counterText: "",
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20),
-                            borderSide:
-                            BorderSide(color: secondary)),
+                            borderSide: BorderSide(color: secondary)),
                       ),
                       maxLength: 10,
-                      onChanged: (e)=>_onChangehandler(),
+                      onChanged: (e) => _onChangehandler(true),
                       // onSaved: (input) => _mobile = input,
                     ),
                   ),
+                  SizedBox(height: 8),
+                  Theme(
+                    data: ThemeData(primaryColor: primary),
+                    child: TextFormField(
+                      controller: _nameController,
+                      cursorColor: primary,
+                      validator: (input) {
+                        if (input.isEmpty) {
+                          return 'Provide name';
+                        } else {}
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Name (As PAN Card)',
+                        hintText: 'Enter Name',
+                        counterText: "",
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide(color: secondary)),
+                      ),
+                      maxLength: 10,
+                      onChanged: (e) => _onChangehandler(false),
+                      // onSaved: (input) => _mobile = input,
+                    ),
+                  )
                 ],
               )),
         ),
       ),
     );
   }
+
   Future<void> getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
@@ -170,7 +198,11 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
     });
   }
 
-  _onChangehandler() {
-    _mobile = _mobileController.text;
+  _onChangehandler(bool isMobile) {
+    if(isMobile){
+      _mobile = _mobileController.text;
+    }else {
+      _name = _nameController.text;
+    }
   }
 }

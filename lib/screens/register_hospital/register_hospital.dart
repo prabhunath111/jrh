@@ -17,13 +17,15 @@ class _RegisterHospitalState extends State<RegisterHospital> {
   final baseUrl = 'localhost:3030/user';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _mobileController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
   String _mobile;
+  String _name;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent.withOpacity(0.5),
+        backgroundColor: secondary,
         title: Text(
           'Hospital Detail',
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.5),
@@ -85,7 +87,6 @@ class _RegisterHospitalState extends State<RegisterHospital> {
         },
         child: Container(
           height: 60,
-          // width: MediaQuery.of(context).size.width * 0.1,
           decoration: BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -111,8 +112,6 @@ class _RegisterHospitalState extends State<RegisterHospital> {
   }
   Widget getmobileWidget() {
     return Container(
-      // height: 60,
-      // width: MediaQuery.of(context).size.width * 0.1,
       child:
       Padding(
         padding: const EdgeInsets.only(left: 4.0, right: 4.0),
@@ -125,6 +124,7 @@ class _RegisterHospitalState extends State<RegisterHospital> {
                   data: ThemeData(primaryColor: primary),
                   child: TextFormField(
                     controller: _mobileController,
+                    keyboardType: TextInputType.number,
                     cursorColor: primary,
                     validator: (input) {
                       if (input.isEmpty) {
@@ -144,10 +144,34 @@ class _RegisterHospitalState extends State<RegisterHospital> {
                           BorderSide(color: secondary)),
                     ),
                     maxLength: 10,
-                    onChanged: (e)=>_onChangehandler(),
+                    onChanged: (e)=>_onChangehandler(true),
                     // onSaved: (input) => _mobile = input,
                   ),
                 ),
+                SizedBox(height: 8),
+                Theme(
+                  data: ThemeData(primaryColor: primary),
+                  child: TextFormField(
+                    controller: _nameController,
+                    cursorColor: primary,
+                    validator: (input) {
+                      if (input.isEmpty) {
+                        return 'Provide name';
+                      } else {}
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Hospital Name',
+                      hintText: 'Enter Hospital Name',
+                      counterText: "",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          borderSide: BorderSide(color: secondary)),
+                    ),
+                    maxLength: 10,
+                    onChanged: (e) => _onChangehandler(false),
+                    // onSaved: (input) => _mobile = input,
+                  ),
+                )
               ],
             )),
       ),
@@ -167,7 +191,11 @@ class _RegisterHospitalState extends State<RegisterHospital> {
     });
   }
 
-  _onChangehandler() {
-    _mobile = _mobileController.text;
+  _onChangehandler(bool isMobile) {
+    if(isMobile){
+      _mobile = _mobileController.text;
+    }else {
+      _name = _nameController.text;
+    }
   }
 }

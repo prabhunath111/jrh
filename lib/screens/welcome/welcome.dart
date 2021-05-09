@@ -66,6 +66,7 @@ class _WelcomeState extends State<Welcome> {
                                 data: ThemeData(primaryColor: primary),
                                 child: TextFormField(
                                   controller: _mobileController,
+                                  keyboardType: TextInputType.number,
                                   cursorColor: primary,
                                   validator: (input) {
                                     if (input.isEmpty) {
@@ -85,7 +86,7 @@ class _WelcomeState extends State<Welcome> {
                                             BorderSide(color: secondary)),
                                   ),
                                   maxLength: 10,
-                                  onChanged: (e)=>_onChangehandler(),
+                                  onChanged: (e) => _onChangehandler(),
                                   // onSaved: (input) => _mobile = input,
                                 ),
                               ),
@@ -95,7 +96,7 @@ class _WelcomeState extends State<Welcome> {
                       RegisterRow(isDoctor: false),
                       InkWell(
                         onTap: () {
-                        sendOtp();
+                          sendOtp();
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(top: 8),
@@ -130,10 +131,8 @@ class _WelcomeState extends State<Welcome> {
 
   void sendOtp() {
     if (_formKey.currentState.validate()) {
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => OtpScreen(mobile: _mobile)));
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (context) => OtpScreen(mobile: _mobile)));
     }
   }
 
