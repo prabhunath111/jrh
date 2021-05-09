@@ -9,5 +9,5 @@ void main() => runApp(
         routes: {
           '/': (context) => Welcome(),
           '/welcome': (context) => Welcome(),
-          'home': (context) => Home()
+          'home': (context) => HomeScreen()
         }));
