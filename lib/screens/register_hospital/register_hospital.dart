@@ -130,9 +130,10 @@ class _RegisterHospitalState extends State<RegisterHospital> {
                       if (input.isEmpty) {
                         return 'Provide mobile number';
                       }
-                      if (input.length < 10) {
+                      else if (input.length < 10) {
                         return 'Provide 10 digit mobile number';
                       }
+                      return input;
                     },
                     decoration: InputDecoration(
                       labelText: 'Mobile',
@@ -158,6 +159,7 @@ class _RegisterHospitalState extends State<RegisterHospital> {
                       if (input.isEmpty) {
                         return 'Provide name';
                       } else {}
+                      return input;
                     },
                     decoration: InputDecoration(
                       labelText: 'Hospital Name',

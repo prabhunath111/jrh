@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "182072907885",
+    "project_id": "jrh-healthcare",
+    "storage_bucket": "jrh-healthcare.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:182072907885:android:034e068325dc219d4d0764",
+        "android_client_info": {
+          "package_name": "com.example.jrh_innoventure"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "182072907885-arg0gg5iccm5e0j3ljv6rel34ru93ba6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJqbPlLJ-O6jiOKLi7p5NRGtmebiyq0vQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "182072907885-arg0gg5iccm5e0j3ljv6rel34ru93ba6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

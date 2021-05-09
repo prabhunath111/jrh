@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 // import 'package:image_picker/image_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jrh_innoventure/Utils/toast.dart';
+import 'package:jrh_innoventure/services/firebase_services/firebase_service.dart';
 import 'package:jrh_innoventure/styles/colors.dart';
 
 class RegisterDoctor extends StatefulWidget {
@@ -89,6 +91,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
       child: InkWell(
         onTap: () {
           // _upload(_image);
+          _addDoctors();
         },
         child: Container(
           height: 60,
@@ -139,6 +142,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                         } else if (input.length < 10) {
                           return 'Provide 10 digit mobile number';
                         } else {}
+                        return input;
                       },
                       decoration: InputDecoration(
                         labelText: 'Mobile',
@@ -163,6 +167,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                         if (input.isEmpty) {
                           return 'Provide name';
                         } else {}
+                        return input;
                       },
                       decoration: InputDecoration(
                         labelText: 'Name (As PAN Card)',
@@ -172,7 +177,6 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                             borderRadius: BorderRadius.circular(20),
                             borderSide: BorderSide(color: secondary)),
                       ),
-                      maxLength: 10,
                       onChanged: (e) => _onChangehandler(false),
                       // onSaved: (input) => _mobile = input,
                     ),
@@ -199,10 +203,24 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
   }
 
   _onChangehandler(bool isMobile) {
-    if(isMobile){
+    if (isMobile) {
       _mobile = _mobileController.text;
-    }else {
+    } else {
       _name = _nameController.text;
     }
+  }
+
+  Future<void> _addDoctors() async{
+    CollectionReference doctors =
+        FirebaseFirestore.instance.collection('doctors');
+    var a = await FirebaseServices().getFromDatabase(doctors);
+    // print("Line217 ${a.data.data()}");
+    print("line218 ${a.data()['mobile']}");
+    // Call the user's CollectionReference to add a new user
+    var data = {
+      'name': _name,
+      'mobile': _mobile
+    };
+    await FirebaseServices().saveToDatabase(doctors, data);
   }
 }

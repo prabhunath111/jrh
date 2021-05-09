@@ -72,9 +72,10 @@ class _WelcomeState extends State<Welcome> {
                                     if (input.isEmpty) {
                                       return 'Provide mobile number';
                                     }
-                                    if (input.length < 10) {
+                                    else if (input.length < 10) {
                                       return 'Provide 10 digit mobile number';
                                     }
+                                    return input;
                                   },
                                   decoration: InputDecoration(
                                     labelText: 'Mobile',
