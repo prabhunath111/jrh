@@ -9,15 +9,16 @@ class WelcomeText extends StatelessWidget {
     var width = MediaQuery.of(context).size.width;
     return Positioned(
       top: height * 0.2,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      right: 0,
+      left: 0,
+      child: Center(
         child: Text(
           '~ Welcome ~',
           style: TextStyle(
               color: white,
-              fontSize: width * 0.15,
+              fontSize: width * 0.11,
               fontWeight: FontWeight.bold,
-              letterSpacing: 2),
+              letterSpacing: 1.5),
         ),
       ),
     );

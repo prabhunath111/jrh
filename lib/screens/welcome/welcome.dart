@@ -4,6 +4,8 @@ import 'package:jrh_innoventure/screens/welcome/background_color.dart';
 import 'package:jrh_innoventure/screens/welcome/welcome_text.dart';
 import 'package:jrh_innoventure/styles/colors.dart';
 
+import 'register_row.dart';
+
 class Welcome extends StatefulWidget {
   @override
   _WelcomeState createState() => _WelcomeState();
@@ -89,6 +91,8 @@ class _WelcomeState extends State<Welcome> {
                               ),
                             ],
                           )),
+                      RegisterRow(isDoctor: true),
+                      RegisterRow(isDoctor: false),
                       InkWell(
                         onTap: () {
                         sendOtp();
