@@ -187,7 +187,7 @@ class _RegisterHospitalState extends State<RegisterHospital> {
         _image = File(pickedFile.path);
         print('line154 $_image');
       } else {
-        ToastCustom().showToast('No image selected.');
+        ToastCustom().showToast('No image selected.', false);
         // print('No image selected.');
       }
     });

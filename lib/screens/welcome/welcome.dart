@@ -74,8 +74,8 @@ class _WelcomeState extends State<Welcome> {
                                     }
                                     else if (input.length < 10) {
                                       return 'Provide 10 digit mobile number';
-                                    }
-                                    return input;
+                                    }else{}
+                                    // return input;
                                   },
                                   decoration: InputDecoration(
                                     labelText: 'Mobile',

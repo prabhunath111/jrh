@@ -196,7 +196,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
         _image = File(pickedFile.path);
         print('line154 $_image');
       } else {
-        ToastCustom().showToast('No image selected.');
+        ToastCustom().showToast('No image selected.', false);
         // print('No image selected.');
       }
     });
@@ -210,17 +210,24 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
     }
   }
 
-  Future<void> _addDoctors() async{
-    CollectionReference doctors =
-        FirebaseFirestore.instance.collection('doctors');
-    var a = await FirebaseServices().getFromDatabase(doctors);
-    // print("Line217 ${a.data.data()}");
-    print("line218 ${a.data()['mobile']}");
-    // Call the user's CollectionReference to add a new user
-    var data = {
-      'name': _name,
-      'mobile': _mobile
-    };
-    await FirebaseServices().saveToDatabase(doctors, data);
+  Future<void> _addDoctors() async {
+    _nameController.clear();
+    _mobileController.clear();
+    FocusScope.of(context).unfocus();
+    String doctor = 'doctors';
+    List idList = await FirebaseServices().getFromDatabase('doctors');
+    if(idList.contains(_mobile)){
+      print('$_mobile is present in the list $idList');
+      ToastCustom().showToast('Already Registered', false);
+    } else {
+      print('$_mobile is not present in the list $_mobile');
+      Map<String, dynamic> data =
+      {'name': _name,
+       'mobile': _mobile,
+       'status': 'unverified',
+       'createdAt': DateTime.now()};
+      await FirebaseServices().saveToDatabase(doctor, data);
+      ToastCustom().showToast('Registered successfully', true);
+    }
   }
 }
