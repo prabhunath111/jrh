@@ -14,8 +14,8 @@ class BgColor extends StatelessWidget {
               begin: Alignment.bottomRight,
               end: Alignment.topLeft,
               colors: [primary, secondary]),
-          borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(height * 0.25))),
+          borderRadius:
+              BorderRadius.only(bottomLeft: Radius.circular(height * 0.25))),
     );
   }
 }

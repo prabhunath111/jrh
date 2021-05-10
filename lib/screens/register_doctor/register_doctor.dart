@@ -1,13 +1,10 @@
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-// import 'package:image_picker/image_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jrh_innoventure/Utils/toast.dart';
 import 'package:jrh_innoventure/services/firebase_services/firebase_service.dart';
 import 'package:jrh_innoventure/styles/colors.dart';
+import 'package:file_picker/file_picker.dart';
 
 class RegisterDoctor extends StatefulWidget {
   @override
@@ -15,14 +12,18 @@ class RegisterDoctor extends StatefulWidget {
 }
 
 class _RegisterDoctorState extends State<RegisterDoctor> {
-  File _image;
   final picker = ImagePicker();
   final baseUrl = 'localhost:3030/user';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _mobileController = TextEditingController();
   TextEditingController _nameController = TextEditingController();
+  List _filesList = [];
   String _mobile;
   String _name;
+  File _aadhar;
+  File _pan;
+  File _cv;
+  File _image;
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +56,32 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
 
   Widget getCards(String title, Icon icon) {
     return InkWell(
-      onTap: () {
-        getImage();
+      onTap: () async {
+        // if(title == 'Upload Aadhar') {
+        FilePickerResult result = await FilePicker.platform.pickFiles();
+        if (result != null) {
+          File file = File(result.files.single.path);
+          if (title == 'Upload Aadhar') {
+            _aadhar = file;
+            _filesList.add(_aadhar);
+          } else if (title == 'Upload PAN') {
+            _pan = file;
+            _filesList.add(_pan);
+          } else if (title == 'Upload CV') {
+            _cv = file;
+            _filesList.add(_cv);
+          } else if (title == 'Upload Image') {
+            _image = file;
+            _filesList.add(_image);
+          } else {}
+        } else {
+          // User canceled the picker
+          print("Line68 Didn't pick aadhar...");
+        }
+
+        // print("Line82 $_filesList");
+
+        // getImage();
       },
       child: Card(
         elevation: 1,
@@ -216,16 +241,17 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
     FocusScope.of(context).unfocus();
     String doctor = 'doctors';
     List idList = await FirebaseServices().getFromDatabase('doctors');
-    if(idList.contains(_mobile)){
+    if (idList.contains(_mobile)) {
       print('$_mobile is present in the list $idList');
       ToastCustom().showToast('Already Registered', false);
     } else {
       print('$_mobile is not present in the list $_mobile');
-      Map<String, dynamic> data =
-      {'name': _name,
-       'mobile': _mobile,
-       'status': 'unverified',
-       'createdAt': DateTime.now()};
+      Map<String, dynamic> data = {
+        'name': _name,
+        'mobile': _mobile,
+        'status': 'unverified',
+        'createdAt': DateTime.now()
+      };
       await FirebaseServices().saveToDatabase(doctor, data);
       ToastCustom().showToast('Registered successfully', true);
     }
