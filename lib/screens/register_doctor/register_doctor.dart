@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jrh_innoventure/Utils/toast.dart';
+import 'package:jrh_innoventure/constants/strings.dart';
 import 'package:jrh_innoventure/services/firebase_services/firebase_service.dart';
 import 'package:jrh_innoventure/styles/colors.dart';
 import 'package:file_picker/file_picker.dart';
@@ -58,22 +59,82 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
         ),
         centerTitle: true,
       ),
-      body: _getBody(),
+      body: (isLoading)
+          ? Center(
+              child: Card(
+              clipBehavior: Clip.antiAlias,
+              color: primary,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(
+                      backgroundColor: secondary,
+                      valueColor: new AlwaysStoppedAnimation<Color>(white),
+                    ),
+                    Text("Please wait", style: TextStyle(
+                      color: white,
+                      fontSize: 20
+                    ))
+                  ],
+                ),
+              ),
+            ))
+          : _getBody(),
     );
   }
 
   Widget _getBody() {
     return ListView(
       children: [
-        getCards('Upload Aadhar', Icon(Icons.upload_sharp)),
-        getCards('Upload PAN', Icon(Icons.upload_sharp)),
-        getCards('Upload CV', Icon(Icons.upload_sharp)),
-        getCards('Degree Certificate', Icon(Icons.upload_sharp)),
-        getCards('Registration Certificate', Icon(Icons.upload_sharp)),
-        getCards('Upload Image', Icon(Icons.upload_sharp)),
-        getCards('Signature Image', Icon(Icons.upload_sharp)),
-        getCards('Experience Letter(Optional)', Icon(Icons.upload_sharp)),
-        getCards('Last Pay Slip(Optional)', Icon(Icons.upload_sharp)),
+        getCards(
+            'Upload Aadhar',
+            Icon(
+              (_aadhar == null) ? Icons.upload_sharp : Icons.done,
+              color: (_aadhar == null) ? grey : secondary,
+            )),
+        getCards(
+            'Upload PAN',
+            Icon(
+              (_pan == null) ? Icons.upload_sharp : Icons.done,
+              color: (_pan == null) ? grey : secondary,
+            )),
+        getCards(
+            'Upload CV',
+            Icon((_cv == null) ? Icons.upload_sharp : Icons.done,
+                color: (_cv == null) ? grey : secondary)),
+        getCards(
+            'Degree Certificate',
+            Icon(
+              (_degreeCertificate == null) ? Icons.upload_sharp : Icons.done,
+              color: (_degreeCertificate == null) ? grey : secondary,
+            )),
+        getCards(
+            'Registration Certificate',
+            Icon(
+                (_registrationCertificate == null)
+                    ? Icons.upload_sharp
+                    : Icons.done,
+                color: (_registrationCertificate == null) ? grey : secondary)),
+        getCards(
+            'Upload Image',
+            Icon((_image == null) ? Icons.upload_sharp : Icons.done,
+                color: (_image == null) ? grey : secondary)),
+        getCards(
+            'Signature Image',
+            Icon((_signImage == null) ? Icons.upload_sharp : Icons.done,
+                color: (_signImage == null) ? grey : secondary)),
+        getCards(
+            'Experience Letter(Optional)',
+            Icon(
+              (_expLetter == null) ? Icons.upload_sharp : Icons.done,
+              color: (_expLetter == null) ? grey : secondary,
+            )),
+        getCards(
+            'Last Pay Slip(Optional)',
+            Icon((_lastPaySlip == null) ? Icons.upload_sharp : Icons.done,
+                color: (_lastPaySlip == null) ? grey : secondary)),
         getmobileWidget(),
         getDeclarationText(),
         getTermsCondition(),
@@ -89,32 +150,50 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
         if (result != null) {
           File file = File(result.files.single.path);
           if (title == 'Upload Aadhar') {
-            _aadhar = file;
-            _filesList.add(_aadhar);
+            setState(() {
+              _aadhar = file;
+              _filesList.add(_aadhar);
+            });
           } else if (title == 'Upload PAN') {
-            _pan = file;
-            _filesList.add(_pan);
+            setState(() {
+              _pan = file;
+              _filesList.add(_pan);
+            });
           } else if (title == 'Upload CV') {
-            _cv = file;
-            _filesList.add(_cv);
+            setState(() {
+              _cv = file;
+              _filesList.add(_cv);
+            });
           } else if (title == 'Degree Certificate') {
-            _degreeCertificate = file;
-            _filesList.add(_degreeCertificate);
+            setState(() {
+              _degreeCertificate = file;
+              _filesList.add(_degreeCertificate);
+            });
           } else if (title == 'Registration Certificate') {
-            _registrationCertificate = file;
-            _filesList.add(_registrationCertificate);
+            setState(() {
+              _registrationCertificate = file;
+              _filesList.add(_registrationCertificate);
+            });
           } else if (title == 'Signature Image') {
-            _signImage = file;
-            _filesList.add(_signImage);
+            setState(() {
+              _signImage = file;
+              _filesList.add(_signImage);
+            });
           } else if (title == 'Experience Letter(Optional)') {
-            _expLetter = file;
-            _filesList.add(_expLetter);
+            setState(() {
+              _expLetter = file;
+              _filesList.add(_expLetter);
+            });
           } else if (title == 'Last Pay Slip(Optional)') {
-            _lastPaySlip = file;
-            _filesList.add(_lastPaySlip);
+            setState(() {
+              _lastPaySlip = file;
+              _filesList.add(_lastPaySlip);
+            });
           } else if (title == 'Upload Image') {
-            _image = file;
-            _filesList.add(_image);
+            setState(() {
+              _image = file;
+              _filesList.add(_image);
+            });
           } else {}
         } else {
           // User canceled the picker
@@ -161,9 +240,14 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                 _degreeCertificate != null &&
                 _registrationCertificate != null &&
                 _image != null &&
-                _signImage != null);
+                _signImage != null &&
+                isDeclaration &&
+                isTermsCondition);
             print("Line160 $isValidation");
             if (isValidation) {
+              setState(() {
+                isLoading = true;
+              });
               List idList = await FirebaseServices().getFromDatabase('doctors');
               if (idList.contains(_mobile)) {
                 print('$_mobile is present in the list $idList');
@@ -171,6 +255,7 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
               } else {
                 for (int i = 0; i < _filesList.length; i++) {
                   await uploadFile(_filesList[i]);
+                  print("Line257 ${_imageUrls.length}");
                 }
                 // print("Line133 ${_imageUrls.length}");
                 _addDoctors();
@@ -282,9 +367,9 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
   }
 
   Future<void> _addDoctors() async {
-    _nameController.clear();
-    _mobileController.clear();
-    FocusScope.of(context).unfocus();
+    // _nameController.clear();
+    // _mobileController.clear();
+    // FocusScope.of(context).unfocus();
     String doctor = 'doctors';
     print('$_mobile is not present in the list $_mobile');
     Map<String, dynamic> data = {
@@ -297,13 +382,17 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
       'degreeCertificate': _imageUrls[3],
       'registration': _imageUrls[4],
       'image': _imageUrls[5],
-      'sign':_imageUrls[6],
-      'experience': _imageUrls[7],
-      'paySlip': _imageUrls[8],
+      'sign': _imageUrls[6],
+      'experience': (_imageUrls.length>=8)?_imageUrls[7]:'null',
+      'paySlip': (_imageUrls.length>=9)?_imageUrls[8]:'null',
       'createdAt': DateTime.now()
     };
     await FirebaseServices().saveToDatabase(doctor, data);
+    setState(() {
+      isLoading = false;
+    });
     ToastCustom().showToast('Registered successfully', true);
+    Navigator.pop(context);
   }
 
   Future<void> uploadFile(File file) async {
@@ -375,16 +464,43 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                         textDirection: TextDirection.ltr,
                         style: TextStyle(),
                       ),
-                      Text(
+                      FlatButton(onPressed: (){
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => _buildPopupDialog(context),
+                        );
+                      }, child: Text(
                         'Terms & Conditions',
                         style: TextStyle(color: primary),
-                      )
+                      ))
                     ],
                   ),
                 )
               ],
             )),
       ),
+    );
+  }
+
+  Widget _buildPopupDialog(BuildContext context) {
+    return new AlertDialog(
+      title: Center(child: const Text('Terms & Conditions')),
+      content: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(TERMS_CONDS),
+        ],
+      ),
+      actions: <Widget>[
+        new FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          textColor: Theme.of(context).primaryColor,
+          child: const Text('Close', style: TextStyle(color: primary),),
+        ),
+      ],
     );
   }
 }
