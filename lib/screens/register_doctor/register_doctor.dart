@@ -1,10 +1,14 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jrh_innoventure/Utils/toast.dart';
 import 'package:jrh_innoventure/services/firebase_services/firebase_service.dart';
 import 'package:jrh_innoventure/styles/colors.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class RegisterDoctor extends StatefulWidget {
   @override
@@ -17,13 +21,30 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _mobileController = TextEditingController();
   TextEditingController _nameController = TextEditingController();
+  var storage = FirebaseStorage.instance;
+  bool isDeclaration = false;
+  bool isTermsCondition = false;
+  bool isAllRequiredFilled = false;
+  bool isLoading = false;
+
+  CollectionReference imgRef;
+  firebase_storage.Reference ref;
+
   List _filesList = [];
+  List _imageUrls = [];
   String _mobile;
   String _name;
+  String _selfDeclaration =
+      'I hereby declare that above submitted docs are correct.';
   File _aadhar;
   File _pan;
   File _cv;
   File _image;
+  File _degreeCertificate;
+  File _registrationCertificate;
+  File _signImage;
+  File _expLetter;
+  File _lastPaySlip;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +68,15 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
         getCards('Upload Aadhar', Icon(Icons.upload_sharp)),
         getCards('Upload PAN', Icon(Icons.upload_sharp)),
         getCards('Upload CV', Icon(Icons.upload_sharp)),
+        getCards('Degree Certificate', Icon(Icons.upload_sharp)),
+        getCards('Registration Certificate', Icon(Icons.upload_sharp)),
         getCards('Upload Image', Icon(Icons.upload_sharp)),
+        getCards('Signature Image', Icon(Icons.upload_sharp)),
+        getCards('Experience Letter(Optional)', Icon(Icons.upload_sharp)),
+        getCards('Last Pay Slip(Optional)', Icon(Icons.upload_sharp)),
         getmobileWidget(),
+        getDeclarationText(),
+        getTermsCondition(),
         getSubmitBtn()
       ],
     );
@@ -57,7 +85,6 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
   Widget getCards(String title, Icon icon) {
     return InkWell(
       onTap: () async {
-        // if(title == 'Upload Aadhar') {
         FilePickerResult result = await FilePicker.platform.pickFiles();
         if (result != null) {
           File file = File(result.files.single.path);
@@ -70,6 +97,21 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
           } else if (title == 'Upload CV') {
             _cv = file;
             _filesList.add(_cv);
+          } else if (title == 'Degree Certificate') {
+            _degreeCertificate = file;
+            _filesList.add(_degreeCertificate);
+          } else if (title == 'Registration Certificate') {
+            _registrationCertificate = file;
+            _filesList.add(_registrationCertificate);
+          } else if (title == 'Signature Image') {
+            _signImage = file;
+            _filesList.add(_signImage);
+          } else if (title == 'Experience Letter(Optional)') {
+            _expLetter = file;
+            _filesList.add(_expLetter);
+          } else if (title == 'Last Pay Slip(Optional)') {
+            _lastPaySlip = file;
+            _filesList.add(_lastPaySlip);
           } else if (title == 'Upload Image') {
             _image = file;
             _filesList.add(_image);
@@ -78,10 +120,6 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
           // User canceled the picker
           print("Line68 Didn't pick aadhar...");
         }
-
-        // print("Line82 $_filesList");
-
-        // getImage();
       },
       child: Card(
         elevation: 1,
@@ -114,9 +152,33 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: InkWell(
-        onTap: () {
-          // _upload(_image);
-          _addDoctors();
+        onTap: () async {
+          if (_formKey.currentState.validate()) {
+            // Upload image
+            bool isValidation = (_aadhar != null &&
+                _pan != null &&
+                _cv != null &&
+                _degreeCertificate != null &&
+                _registrationCertificate != null &&
+                _image != null &&
+                _signImage != null);
+            print("Line160 $isValidation");
+            if (isValidation) {
+              List idList = await FirebaseServices().getFromDatabase('doctors');
+              if (idList.contains(_mobile)) {
+                print('$_mobile is present in the list $idList');
+                ToastCustom().showToast('Already Registered', false);
+              } else {
+                for (int i = 0; i < _filesList.length; i++) {
+                  await uploadFile(_filesList[i]);
+                }
+                // print("Line133 ${_imageUrls.length}");
+                _addDoctors();
+              }
+            } else {
+              ToastCustom().showToast('Select required files', false);
+            }
+          }
         },
         child: Container(
           height: 60,
@@ -167,7 +229,6 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                         } else if (input.length < 10) {
                           return 'Provide 10 digit mobile number';
                         } else {}
-                        return input;
                       },
                       decoration: InputDecoration(
                         labelText: 'Mobile',
@@ -192,7 +253,6 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
                         if (input.isEmpty) {
                           return 'Provide name';
                         } else {}
-                        return input;
                       },
                       decoration: InputDecoration(
                         labelText: 'Name (As PAN Card)',
@@ -213,20 +273,6 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
     );
   }
 
-  Future<void> getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-        print('line154 $_image');
-      } else {
-        ToastCustom().showToast('No image selected.', false);
-        // print('No image selected.');
-      }
-    });
-  }
-
   _onChangehandler(bool isMobile) {
     if (isMobile) {
       _mobile = _mobileController.text;
@@ -240,20 +286,105 @@ class _RegisterDoctorState extends State<RegisterDoctor> {
     _mobileController.clear();
     FocusScope.of(context).unfocus();
     String doctor = 'doctors';
-    List idList = await FirebaseServices().getFromDatabase('doctors');
-    if (idList.contains(_mobile)) {
-      print('$_mobile is present in the list $idList');
-      ToastCustom().showToast('Already Registered', false);
-    } else {
-      print('$_mobile is not present in the list $_mobile');
-      Map<String, dynamic> data = {
-        'name': _name,
-        'mobile': _mobile,
-        'status': 'unverified',
-        'createdAt': DateTime.now()
-      };
-      await FirebaseServices().saveToDatabase(doctor, data);
-      ToastCustom().showToast('Registered successfully', true);
-    }
+    print('$_mobile is not present in the list $_mobile');
+    Map<String, dynamic> data = {
+      'name': _name,
+      'mobile': _mobile,
+      'status': 'unverified',
+      'aadhar': _imageUrls[0],
+      'pan': _imageUrls[1],
+      'cv': _imageUrls[2],
+      'degreeCertificate': _imageUrls[3],
+      'registration': _imageUrls[4],
+      'image': _imageUrls[5],
+      'sign':_imageUrls[6],
+      'experience': _imageUrls[7],
+      'paySlip': _imageUrls[8],
+      'createdAt': DateTime.now()
+    };
+    await FirebaseServices().saveToDatabase(doctor, data);
+    ToastCustom().showToast('Registered successfully', true);
+  }
+
+  Future<void> uploadFile(File file) async {
+    ref = firebase_storage.FirebaseStorage.instance
+        .ref()
+        .child(_mobile.toString() + file.path.split('/').last);
+    await ref.putFile(file).whenComplete(() async {
+      await ref.getDownloadURL().then((value) {
+        _imageUrls.add(value);
+        // imgRef.add({'url': value});
+      });
+    });
+  }
+
+  Widget getDeclarationText() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Container(
+        child: Padding(
+            padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Checkbox(
+                    activeColor: secondary,
+                    value: isDeclaration,
+                    onChanged: (v) {
+                      setState(() {
+                        isDeclaration = !isDeclaration;
+                      });
+                    }),
+                Expanded(
+                  child: Text(
+                    _selfDeclaration,
+                    textDirection: TextDirection.ltr,
+                    style: TextStyle(),
+                  ),
+                )
+              ],
+            )),
+      ),
+    );
+  }
+
+  Widget getTermsCondition() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: Container(
+        child: Padding(
+            padding: const EdgeInsets.only(left: 4.0, right: 4.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Checkbox(
+                    activeColor: secondary,
+                    value: isTermsCondition,
+                    onChanged: (v) {
+                      setState(() {
+                        isTermsCondition = !isTermsCondition;
+                      });
+                    }),
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Accept? ',
+                        textDirection: TextDirection.ltr,
+                        style: TextStyle(),
+                      ),
+                      Text(
+                        'Terms & Conditions',
+                        style: TextStyle(color: primary),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            )),
+      ),
+    );
   }
 }
