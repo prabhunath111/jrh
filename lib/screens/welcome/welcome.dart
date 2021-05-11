@@ -34,7 +34,8 @@ class _WelcomeState extends State<Welcome> {
           color: greyBackground,
         ),
         BgColor(),
-        WelcomeText(),
+        Image.asset('assets/images/logo.png'),
+        // WelcomeText(),
         Positioned(
           bottom: 10,
           left: 0,
